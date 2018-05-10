@@ -1,22 +1,13 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import {
-  StyleSheet,
-  Platform,
-  Dimensions,
-  NativeModules,
-  NativeEventEmitter,
-  DeviceEventEmitter,
-  processColor,
-  BackHandler
-} from "react-native";
-import { KeyboardTrackingView } from "react-native-keyboard-tracking-view";
-import CustomKeyboardView from "./CustomKeyboardView";
-import KeyboardUtils from "./utils/KeyboardUtils";
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+import {StyleSheet, Platform, Dimensions, NativeModules, NativeEventEmitter, DeviceEventEmitter, processColor, BackHandler} from 'react-native';
+import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
+import CustomKeyboardView from './CustomKeyboardView';
+import KeyboardUtils from './utils/KeyboardUtils';
 
-const IsIOS = Platform.OS === "ios";
-const IsAndroid = Platform.OS === "android";
-const ScreenSize = Dimensions.get("window");
+const IsIOS = Platform.OS === 'ios';
+const IsAndroid = Platform.OS === 'android';
+const ScreenSize = Dimensions.get('window');
 
 export default class KeyboardAccessoryView extends Component {
   static propTypes = {
@@ -34,7 +25,6 @@ export default class KeyboardAccessoryView extends Component {
     requiresSameParentToManageScrollView: PropTypes.bool,
     addBottomView: PropTypes.bool,
     allowHitsOutsideBounds: PropTypes.bool,
-    dynamicBottomPadding: PropTypes.number
   };
   static defaultProps = {
     iOSScrollBehavior: -1,
@@ -43,22 +33,15 @@ export default class KeyboardAccessoryView extends Component {
     requiresSameParentToManageScrollView: false,
     addBottomView: false,
     allowHitsOutsideBounds: false,
-    dynamicBottomPadding: 0
   };
 
   constructor(props) {
     super(props);
 
-    this.onContainerComponentHeightChanged = this.onContainerComponentHeightChanged.bind(
-      this
-    );
+    this.onContainerComponentHeightChanged = this.onContainerComponentHeightChanged.bind(this);
     this.processInitialProps = this.processInitialProps.bind(this);
-    this.registerForKeyboardResignedEvent = this.registerForKeyboardResignedEvent.bind(
-      this
-    );
-    this.registerAndroidBackHandler = this.registerAndroidBackHandler.bind(
-      this
-    );
+    this.registerForKeyboardResignedEvent = this.registerForKeyboardResignedEvent.bind(this);
+    this.registerAndroidBackHandler = this.registerAndroidBackHandler.bind(this);
     this.onAndroidBackPressed = this.onAndroidBackPressed.bind(this);
 
     this.registerForKeyboardResignedEvent();
@@ -70,10 +53,7 @@ export default class KeyboardAccessoryView extends Component {
       this.customInputControllerEventsSubscriber.remove();
     }
     if (IsAndroid) {
-      BackHandler.removeEventListener(
-        "hardwareBackPress",
-        this.onAndroidBackPressed
-      );
+      BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPressed);
     }
   }
 
@@ -85,14 +65,8 @@ export default class KeyboardAccessoryView extends Component {
 
   getIOSTrackingScrollBehavior() {
     let scrollBehavior = this.props.iOSScrollBehavior;
-    if (
-      IsIOS &&
-      NativeModules.KeyboardTrackingViewManager &&
-      scrollBehavior === -1
-    ) {
-      scrollBehavior =
-        NativeModules.KeyboardTrackingViewManager
-          .KeyboardTrackingScrollBehaviorFixedOffset;
+    if (IsIOS && NativeModules.KeyboardTrackingViewManager && scrollBehavior === -1) {
+      scrollBehavior = NativeModules.KeyboardTrackingViewManager.KeyboardTrackingScrollBehaviorFixedOffset;
     }
     return scrollBehavior;
   }
@@ -101,32 +75,24 @@ export default class KeyboardAccessoryView extends Component {
     let eventEmitter = null;
     if (IsIOS) {
       if (NativeModules.CustomInputController) {
-        eventEmitter = new NativeEventEmitter(
-          NativeModules.CustomInputController
-        );
+        eventEmitter = new NativeEventEmitter(NativeModules.CustomInputController);
       }
     } else {
       eventEmitter = DeviceEventEmitter;
     }
 
     if (eventEmitter !== null) {
-      this.customInputControllerEventsSubscriber = eventEmitter.addListener(
-        "kbdResigned",
-        () => {
-          if (this.props.onKeyboardResigned) {
-            this.props.onKeyboardResigned();
-          }
+      this.customInputControllerEventsSubscriber = eventEmitter.addListener('kbdResigned', () => {
+        if (this.props.onKeyboardResigned) {
+          this.props.onKeyboardResigned();
         }
-      );
+      });
     }
   }
 
   registerAndroidBackHandler() {
     if (IsAndroid) {
-      BackHandler.addEventListener(
-        "hardwareBackPress",
-        this.onAndroidBackPressed
-      );
+      BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPressed);
     }
   }
 
@@ -139,15 +105,9 @@ export default class KeyboardAccessoryView extends Component {
   }
 
   processInitialProps() {
-    if (
-      IsIOS &&
-      this.props.kbInitialProps &&
-      this.props.kbInitialProps.backgroundColor
-    ) {
+    if (IsIOS && this.props.kbInitialProps && this.props.kbInitialProps.backgroundColor) {
       const processedProps = Object.assign({}, this.props.kbInitialProps);
-      processedProps.backgroundColor = processColor(
-        processedProps.backgroundColor
-      );
+      processedProps.backgroundColor = processColor(processedProps.backgroundColor);
       return processedProps;
     }
     return this.props.kbInitialProps;
@@ -169,18 +129,15 @@ export default class KeyboardAccessoryView extends Component {
   render() {
     return (
       <KeyboardTrackingView
-        ref={r => (this.trackingViewRef = r)}
+        ref={r => this.trackingViewRef = r}
         style={styles.trackingToolbarContainer}
         onLayout={this.onContainerComponentHeightChanged}
         scrollBehavior={this.getIOSTrackingScrollBehavior()}
         revealKeyboardInteractive={this.props.revealKeyboardInteractive}
         manageScrollView={this.props.manageScrollView}
-        requiresSameParentToManageScrollView={
-          this.props.requiresSameParentToManageScrollView
-        }
+        requiresSameParentToManageScrollView={this.props.requiresSameParentToManageScrollView}
         addBottomView={this.props.addBottomView}
         allowHitsOutsideBounds={this.props.allowHitsOutsideBounds}
-        dynamicBottomPadding={this.props.dynamicBottomPadding}
       >
         {this.props.renderContent && this.props.renderContent()}
         <CustomKeyboardView
@@ -200,10 +157,10 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         width: ScreenSize.width,
-        position: "absolute",
+        position: 'absolute',
         bottom: 0,
-        left: 0
-      }
-    })
-  }
+        left: 0,
+      },
+    }),
+  },
 });
